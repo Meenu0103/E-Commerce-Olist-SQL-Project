@@ -1,5 +1,5 @@
 /* 
-   OLIST CUSTOMERS – DATA CLEANING SCRIPT
+   OLIST CUSTOMERS – DATA PROFILING SCRIPT
    Dataset: olist_customers_dataset.csv
    Table: olist_customers
    Purpose: Basic quality checks before analysis
@@ -21,7 +21,7 @@ FROM olist_customers;
 
 
 /* DUPLICATE CHECK USING CUSTOMER_ID 
-       (Customer can have multiple orders, so duplicates ARE expected.We DO NOT delete them.) */
+(Customer can have multiple orders, so duplicates ARE expected.We DO NOT delete them.) */
 SELECT customer_id, COUNT(*) AS occurrences
 FROM olist_customers
 GROUP BY customer_id
@@ -44,4 +44,12 @@ WHERE LENGTH(customer_state) > 2;
 -- CHECK FOR CITY NAMES STARTING WITH NUMBERS 
 SELECT customer_city
 FROM olist_customers
-WHERE customer_city ~ '^[0-9]';     -- regex for numeric start
+WHERE customer_city IS NULL
+   OR customer_city = ''
+   OR customer_city ~ '^[0-9]'                 -- starts with digit
+   OR customer_city ~ '[0-9]$'                 -- ends with digit
+   OR customer_city ~ '[[:alpha:]]+[0-9]+'     -- letters followed by digits
+   OR customer_city ~ '[0-9]+[[:alpha:]]+'     -- digits followed by letters
+   OR customer_city ~ '[^[:alpha:]À-ÿ 0-9\-'']' -- invalid characters
+   OR customer_city ~ '^\s'                    -- leading whitespace
+   OR customer_city ~ '\s$';                   -- trailing whitespace
