@@ -1,5 +1,5 @@
 /*
-    OLIST ORDER ITEMS – DATA CLEANING SCRIPT
+    OLIST ORDER ITEMS – DATA PROFILING SCRIPT
     Dataset: olist_order_items_dataset.csv
     Table: olist_order_items
     Purpose: Validate product-level order details, shipping dates, and pricing integrity
@@ -25,7 +25,7 @@ FROM olist_order_items;
 
 /*
  Interpretation:
- - NULL price or freight_value should not happen; flag for quality check.
+ - NULL for price and freight_value should not happen; flag for quality check.
  - Missing shipping_limit_date indicates missing SLA.
 */
 
@@ -38,17 +38,12 @@ GROUP BY order_id, order_item_id
 HAVING COUNT(*) > 1;
 
 
--- INVALID PRICE CHECKS
+-- PRICE CHECKS
 
--- Zero or negative prices (should not exist)
+-- Zero or negative prices, freight values
 SELECT *
 FROM olist_order_items
-WHERE price <= 0;
-
--- Zero or negative freight values
-SELECT *
-FROM olist_order_items
-WHERE freight_value < 0;
+WHERE price <= 0 or freight_value <= 0;
 
 
 -- SHIPPING LIMIT CONSISTENCY
@@ -68,7 +63,6 @@ WHERE freight_value > price;
 
 
 -- PRODUCT REPEAT PURCHASE CHECK
--- (Not bad data, but will be used for insights)
 
 SELECT 
     product_id,
@@ -80,10 +74,10 @@ ORDER BY total_items_sold DESC;
 
 /* 
 DATA QUALITY SUMMARY 
-1. No NULL prices or freight values → Good data quality
-2. No duplicate (order_id + order_item_id) combinations → Good
+1. No NULL prices or freight values -> Good data quality
+2. No duplicate (order_id + order_item_id) combinations -> Good
 3. 4,124 rows where freight_value > price:
       - Legit scenario due to logistics cost > item cost
       - To be treated as outliers only in pricing visualizations
-4. No negative prices or freight values → Good
+4. Checked for repeated purchased product
 */
