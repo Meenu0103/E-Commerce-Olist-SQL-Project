@@ -1,5 +1,5 @@
 /*
-    OLIST PRODUCTS – DATA CLEANING SCRIPT
+    OLIST PRODUCTS – DATA PROFILING SCRIPT
     Dataset: olist_products_dataset.csv
     Table: olist_products
     Purpose: Validate product metadata (dimensions, weight, category, and missing values)
@@ -15,8 +15,8 @@ FROM olist_products;
 SELECT
     SUM(CASE WHEN product_id IS NULL THEN 1 ELSE 0 END) AS product_id_nulls,
     SUM(CASE WHEN product_category_name IS NULL THEN 1 ELSE 0 END) AS category_nulls,
-    SUM(CASE WHEN product_name_lenght IS NULL THEN 1 ELSE 0 END) AS name_length_nulls,
-    SUM(CASE WHEN product_description_lenght IS NULL THEN 1 ELSE 0 END) AS description_length_nulls,
+    SUM(CASE WHEN product_category_name_length IS NULL THEN 1 ELSE 0 END) AS category_name_length_nulls,
+    SUM(CASE WHEN product_description_length IS NULL THEN 1 ELSE 0 END) AS description_length_nulls,
     SUM(CASE WHEN product_photos_qty IS NULL THEN 1 ELSE 0 END) AS photos_nulls,
     SUM(CASE WHEN product_weight_g IS NULL THEN 1 ELSE 0 END) AS weight_nulls,
     SUM(CASE WHEN product_length_cm IS NULL THEN 1 ELSE 0 END) AS length_nulls,
@@ -24,11 +24,10 @@ SELECT
     SUM(CASE WHEN product_width_cm IS NULL THEN 1 ELSE 0 END) AS width_nulls
 FROM olist_products;
 
-
 /*
  Interpretation:
  - Many products in the original Olist dataset are missing dimensions.
- - product_category_name is often NULL → will later be joined with translation table.
+ - product_category_name is often NULL which will later be handled during the analysis.
 */
 
 
@@ -39,7 +38,7 @@ GROUP BY product_id
 HAVING COUNT(*) > 1;
 
 
--- VALIDATE DIMENSIONS (must be > 0)
+-- VALIDATE DIMENSIONS
 
 -- Weight issues
 SELECT *
@@ -82,7 +81,7 @@ WHERE product_category_name IS NULL;
 -- Products with extremely short names
 SELECT *
 FROM olist_products
-WHERE product_name_lenght < 10;
+WHERE product_category_name_length < 10;
 
 -- Products with no photos
 SELECT *
@@ -92,6 +91,6 @@ WHERE product_photos_qty = 0;
 
 
 /* COMMON NOTES:
-   - Do NOT delete rows even if dimensions are missing → analysis requires them.
+   - Do NOT delete rows even if dimensions are missing -> analysis requires them.
    - Instead, we will document missing values and handle during analysis.
 */
