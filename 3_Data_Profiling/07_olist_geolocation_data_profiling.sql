@@ -1,5 +1,5 @@
 /* 
-    OLIST GEOLOCATION – DATA CLEANING SCRIPT
+    OLIST GEOLOCATION – DATA PROFILING SCRIPT
     Dataset: olist_geolocation_dataset.csv
     Table: olist_geolocation
     Purpose: Validate geographic consistency (city/state), 
@@ -23,57 +23,50 @@ FROM olist_geolocation;
 
 /*
  Interpretation:
- - Nulls in coordinates → unusable for mapping.
- - Null city/state → poor geographic classification.
+ - Nulls in coordinates -> unusable for mapping.
+ - Null city/state -> poor geographic classification.
  - But no nulls found for this dataset
 */
 
 
--- 3. CHECK FOR CITY NAMES STARTING WITH NUMBERS (invalid)
+-- 3. CHECK FOR CITY NAMES WITH ONLY NUMBERS (invalid)
 SELECT *
 FROM olist_geolocation
-WHERE geolocation_city ~ '^[0-9]';
-
-
--- 4. FIX CITY NAMES THAT ARE ONLY NUMBERS
--- (Optional cleaning step — run only if you want to remove them)
-
-UPDATE olist_geolocation
-SET geolocation_city = NULL
 WHERE geolocation_city ~ '^[0-9]+$';
 
 
--- 5. LATITUDE / LONGITUDE RANGE VALIDATION
+-- 4. LATITUDE / LONGITUDE RANGE VALIDATION
 -- Brazil latitude range approx:  -34 to +5
 -- Brazil longitude range approx: -74 to -34
 
-SELECT *
-FROM olist_geolocation
-WHERE geolocation_lat NOT BETWEEN -34 AND 5
+select * from olist_geolocation
+where geolocation_lat NOT BETWEEN -34 AND 5
    OR geolocation_lng NOT BETWEEN -74 AND -34;
 
-/*
- Interpretation:
- - Any results here are invalid coordinates (outside Brazil).
-*/
 
-
--- 6. ZIP CODE QUALITY CHECK
--- ZIP should be 5 digits (Brazilian CEP prefix)
-SELECT *
+CREATE TABLE geography_cleaned as (
+SELECT *,
+CASE 
+  WHEN
+   geolocation_lat NOT BETWEEN -34 AND 5
+   OR geolocation_lng NOT BETWEEN -74 AND -34
+  THEN 'Invalid Geography'
+  ELSE 'Brazil'
+END AS geography_flag
 FROM olist_geolocation
-WHERE geolocation_zip_code_prefix::text !~ '^[0-9]{5}$';
+)
+
+SELECT * from geography_cleaned
+where geography_flag != 'Brazil';
 
 
 /*
  Interpretation:
- - Values like "1037", "1046", "1012" appear because some ZIP prefixes have only 4 digits.
- - This is expected in Olist dataset — not a mistake.
- - We DO NOT fix them, but we FLAG them for awareness.
+ - Any results here are invalid coordinates (outside Brazil), so it was flagged.
 */
 
 
--- 7. CHECK FOR DUPLICATE ZIP–CITY–STATE–COORDINATE ROWS
+-- 5. CHECK FOR MULIPLE ZIP–CITY–STATE–COORDINATE ROWS
 SELECT geolocation_zip_code_prefix, geolocation_city, geolocation_state, COUNT(*) AS occurrences
 FROM olist_geolocation
 GROUP BY 1,2,3
@@ -81,13 +74,13 @@ HAVING COUNT(*) > 1;
 
 /*
  Interpretation:
- - Duplicates exist because Olist dataset stores multiple coordinate points per ZIP prefix.
- - These are NOT errors — they represent many samples per region.
+ - These are not duplicates because Olist dataset stores multiple coordinate points per ZIP prefix.
+ - These are NOT errors - they represent many samples per region.
 */
 
 
 
--- 8. STATE CODE VALIDATION
+-- 6. STATE CODE VALIDATION
 SELECT *
 FROM olist_geolocation
 WHERE LENGTH(geolocation_state) != 2;
@@ -96,4 +89,3 @@ WHERE LENGTH(geolocation_state) != 2;
  Interpretation:
  - State codes should always be 2 letters (SP, RJ, MG, …).
 */
-
