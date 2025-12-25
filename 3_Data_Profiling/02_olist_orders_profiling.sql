@@ -1,5 +1,5 @@
 /*
-    OLIST ORDERS – DATA CLEANING SCRIPT
+    OLIST ORDERS – DATA PROFILING SCRIPT
     Dataset: olist_orders_dataset.csv
     Table: olist_orders
     Purpose: Validate timestamps, missing values, and logical consistency
@@ -41,22 +41,22 @@ HAVING COUNT(*) > 1;
 
 --TIMESTAMP LOGIC CHECKS - These identify impossible or suspicious dates.
 
--- A. Approval date *before* purchase date → INVALID 
+-- A. Approval date before purchase date -> INVALID 
 SELECT *
 FROM olist_orders
 WHERE order_approved_at < order_purchase_timestamp;
 
--- B. Customer delivery earlier than approval → INVALID 
+-- B. Customer delivery earlier than approval -> INVALID (Can be managed based on client requirement)
 SELECT *
 FROM olist_orders
 WHERE order_delivered_customer_date < order_approved_at;
 
--- C. Delivered AFTER estimated delivery → Late deliveries (valid insight) 
+-- C. Delivered AFTER estimated delivery -> Late deliveries 
 SELECT *
 FROM olist_orders
 WHERE order_delivered_customer_date > order_estimated_delivery_date;
 
--- D. Delivered BEFORE the carrier even received the package → INVALID 
+-- D. Delivered BEFORE the carrier even received the package -> INVALID 
 SELECT *
 FROM olist_orders
 WHERE order_delivered_customer_date < order_delivered_carrier_date;
@@ -77,9 +77,9 @@ WHERE order_status = 'canceled'
   AND order_delivered_customer_date IS NOT NULL;
 
 
--- DELIVERY TIME ANALYSIS PREP (It's not cleaning, but useful)
+-- DELIVERY TIME ANALYSIS PREP (Not cleaning, but useful)
 
-/* Days taken from purchase → delivery */
+-- Days taken from purchase -> delivery 
 SELECT
     order_id,
     order_purchase_timestamp,
