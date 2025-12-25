@@ -1,5 +1,5 @@
 /* 
-    OLIST SELLERS – DATA CLEANING SCRIPT
+    OLIST SELLERS – DATA PROFILING SCRIPT
     Dataset: olist_sellers_dataset.csv
     Table: olist_sellers
     Purpose: Validate seller attributes & geographical consistency
@@ -49,3 +49,6 @@ WHERE seller_city ~ '^[0-9]';
 UPDATE olist_sellers
 SET seller_city = NULL
 WHERE seller_city ~ '^[0-9]+$';
+
+
+
