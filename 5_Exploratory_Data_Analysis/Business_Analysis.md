@@ -1,7 +1,10 @@
-# Exploratory Data Analysis (EDA)
-## Olist Brazilian E-Commerce Dataset — SQL Analysis
+# Business Analysis - Analytical Insights
+## Olist Brazilian E-Commerce Dataset - SQL Analysis
 
-This document contains the complete exploratory data analysis performed after data cleaning and star schema creation. Each question is tied to a real business objective and answered using SQL.
+This document presents the business analysis and analytical insights derived from the Olist Brazilian E-commerce dataset.
+The analysis is performed after data quality validation and star schema modeling, with each section answering a concrete
+business question using SQL.
+
 ## A. Customer & Geography Analysis
 
 ### 1. Which states have the highest number of customers?
