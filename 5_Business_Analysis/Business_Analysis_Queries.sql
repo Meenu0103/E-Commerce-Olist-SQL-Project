@@ -1,5 +1,5 @@
 -- ==========================================
--- Exploratory Data Analysis (EDA)
+-- Business Analysis
 -- Olist Brazilian E-commerce Dataset
 -- ==========================================
 
