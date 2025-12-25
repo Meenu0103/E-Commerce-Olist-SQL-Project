@@ -1,8 +1,8 @@
 /* 
-    PRODUCT CATEGORY NAME TRANSLATION – DATA CLEANING SCRIPT
+    PRODUCT CATEGORY NAME TRANSLATION – DATA PROFILING SCRIPT
     Dataset: product_category_name_translation.csv
     Table: product_category_name_translation
-    Purpose: Validate mapping quality between Portuguese → English category names.
+    Purpose: Validate mapping quality between Portuguese -> English category names.
 */
 
 -- 1. TOTAL ROW COUNT
@@ -27,7 +27,7 @@ HAVING COUNT(*) > 1;
 
 /* 
  Interpretation:
-   - Duplicates mean multiple English translations → should not exist.
+   - Duplicates mean multiple English translations -> should not exist.
 */
 
 
