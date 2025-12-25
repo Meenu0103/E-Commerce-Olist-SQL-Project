@@ -1,5 +1,5 @@
 /* 
-    OLIST ORDER PAYMENTS – DATA CLEANING SCRIPT
+    OLIST ORDER PAYMENTS – DATA PROFILING SCRIPT
     Dataset: olist_order_payments_dataset.csv
     Table: olist_order_payments
     Purpose: Validate payment information, amounts, and logical consistency
@@ -56,7 +56,7 @@ SELECT *
 FROM olist_order_payments
 WHERE payment_installments < 0;
 
--- Zero installments but payment_value > 0 → might indicate cash/boleto
+-- Zero installments but payment_value > 0 -> might indicate cash payment
 SELECT *
 FROM olist_order_payments
 WHERE payment_installments = 0 AND payment_type NOT IN ('boleto', 'voucher', 'debit_card');
@@ -74,10 +74,9 @@ WHERE payment_type NOT IN ('credit_card', 'boleto', 'voucher', 'debit_card', 'no
 
 
 -- 7. MULTIPLE PAYMENTS PER ORDER CHECK
--- Some orders are paid in multiple transactions → VALID behavior
-SELECT order_id, COUNT(*) AS num_payments, SUM(payment_value) AS total_paid
+-- Some orders are paid in multiple transactions -> VALID behavior
+SELECT order_id, COUNT(*) AS no_of_payments, SUM(payment_value) AS total_paid
 FROM olist_order_payments
 GROUP BY order_id
 HAVING COUNT(*) > 1
-ORDER BY num_payments DESC;
-
+ORDER BY no_of_payments DESC;
